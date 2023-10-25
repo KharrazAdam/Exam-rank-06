@@ -84,20 +84,28 @@ int start(int serSocket)
                     }
                     else
                     {
-                        char conca[1024];
-                        bzero(conca, sizeof(conca));
-                        sprintf(conca, "client %d: ", clientFds[i]);
-                        int x = 0;
-                        while (conca[x])
-                            x++;
+                        int z = 0;
                         int j = 0;
-                        while (buf[j])
+                        while (buf[z])
                         {
-                            conca[x] = buf[j];
-                            x++;
-                            j++;
+                            char conca[1024];
+                            bzero(conca, sizeof(conca));
+                            sprintf(conca, "client %d: ", clientFds[i]);
+                            while (buf[z] && buf[z] != '\n')
+                                z++;
+                            if (buf[z] == '\n')
+                                z++;
+                            int q = 0;
+                            while (conca[q])
+                                q++;
+                            while (j < z)
+                            {
+                                conca[q] = buf[j];
+                                q++;
+                                j++;
+                            }
+                            sendAll(nfds, conca, clientFds[i], clientFds);
                         }
-                        sendAll(nfds, conca, clientFds[i], clientFds);
                     }
                 }
             }
