@@ -27,12 +27,6 @@ void    sendAll(int stop, const char *buf, int id, int *clients)
     } 
 }
 
-struct client
-{
-    int fd;
-    int id;
-};
-
 int start(int serSocket)
 {
     int nfds = serSocket;
@@ -42,7 +36,6 @@ int start(int serSocket)
     FD_ZERO(&readfds);
     FD_SET(serSocket, &readfds);
 
-    char    msg[1024];
     int     id = 0;
     while (1)
     { 
@@ -61,6 +54,7 @@ int start(int serSocket)
             {
                 if (i == serSocket)
                 {
+                    char    msg[1024];
                     int connect = accept(serSocket, NULL, NULL);
                     if (connect == -1)
                     {
@@ -83,14 +77,27 @@ int start(int serSocket)
                     if (rec == 0)
                     {
                         bzero(buf, sizeof(buf));
-                        sprintf(buf, "%d disconnected\n", clientFds[i]);
-                        ft_pustr(buf);
+                        sprintf(buf, "server: client %d just left\n", clientFds[i]);
+                        sendAll(nfds, buf, id, clientFds);
                         FD_CLR(i, &readfds);
                         close(i);
                     }
                     else
                     {
-                        send(i, buf, strlen(buf), 0);
+                        char conca[1024];
+                        bzero(conca, sizeof(conca));
+                        sprintf(conca, "client %d: ", clientFds[i]);
+                        int x = 0;
+                        while (conca[x])
+                            x++;
+                        int j = 0;
+                        while (buf[j])
+                        {
+                            conca[x] = buf[j];
+                            x++;
+                            j++;
+                        }
+                        sendAll(nfds, conca, clientFds[i], clientFds);
                     }
                 }
             }
